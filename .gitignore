@@ -1,0 +1,49 @@
+# ===== PYTHON / FLASK =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+instance/
+.env
+*.sqlite3
+
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# VS Code settings
+.vscode/
+*.code-workspace
+
+# Logs
+*.log
+
+# ===== FLUTTER / DART =====
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+pubspec.lock
+
+# Build outputs
+build/
+flutter_build/
+.generated/
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+
+# ===== GENERAL =====
+# OS files
+.DS_Store
+Thumbs.db
