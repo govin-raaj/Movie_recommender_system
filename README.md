@@ -26,6 +26,3 @@ It suggests movies based on similarity scores calculated from a dataset, and ret
 - HTTP package
 
 ---
-
-ername/Movie_recommender_system.git
-cd Movie_recommender_system
