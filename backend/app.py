@@ -2,65 +2,37 @@ from flask import Flask, request, jsonify
 import pickle
 import pandas as pd
 import requests
-import time
-import random
 
 app = Flask(__name__)
 
-# Load movie data & similarity matrix
+
 movies_dict = pickle.load(open('movies_dic.pkl', 'rb'))
 movies = pd.DataFrame(movies_dict)
 similarity = pickle.load(open('similarity.pkl', 'rb'))
 
-# Persistent requests session to look more like a browser
-session = requests.Session()
-session.headers.update({
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                  'AppleWebKit/537.36 (KHTML, like Gecko) '
-                  'Chrome/116.0.0.0 Safari/537.36',
+
+
+def fetch_poster(movieId):
+    try:
+        headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Safari/537.36',
     'Accept-Language': 'en-US,en;q=0.9',
     'Accept': 'application/json,text/plain,*/*',
     'Referer': 'https://www.themoviedb.org/',
     'Connection': 'keep-alive'
-})
-
-# Cache to avoid refetching posters
-poster_cache = {}
-
-def fetch_poster(movieId):
-    if movieId in poster_cache:
-        return poster_cache[movieId]
-
-    base_url = "https://api.themoviedb.org/3/movie"
-    api_key = "8265bd1679663a7ea12ac168da84d2e8"
-
-    for attempt in range(3):
-        try:
-            url = f"{base_url}/{movieId}?api_key={api_key}&language=en-US"
-            response = session.get(url, timeout=10)
-            response.raise_for_status()
-
-            data = response.json()
-            poster_path = data.get('poster_path')
-
-            if poster_path:
-                time.sleep(random.uniform(0.5, 1.3))  # random delay
-                poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
-                poster_cache[movieId] = poster_url
-                return poster_url
-            else:
-                fallback = ""
-                poster_cache[movieId] = fallback
-                return fallback
-
-        except requests.exceptions.RequestException as e:
-            wait_time = 2 ** attempt
-            print(f"Poster fetch failed for {movieId} (attempt {attempt+1}): {e}")
-            time.sleep(wait_time)
-
-    fallback_error = ""
-    poster_cache[movieId] = fallback_error
-    return fallback_error
+}
+        url = f"https://api.themoviedb.org/3/movie/{movieId}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US"
+        response = requests.get(url,headers=headers ,timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        
+        poster_path = data.get('poster_path')
+        
+        return f"https://image.tmdb.org/t/p/w500{poster_path}"
+        
+    except requests.exceptions.RequestException as e:
+        print(f"Poster fetch failed for {movieId}: {e}")
+        return "https://imgs.search.brave.com/MVs_TQ7UIbmuD1zzNHKr2TXcRR8-yBW4UN1tIvQiklw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4u/cGl4YWJheS5jb20v/cGhvdG8vMjAyNC8w/Ni8yMi8xNi81NS9h/aS1nZW5lcmF0ZWQt/ODg0NjY3Ml82NDAu/anBn"
 
 
 def recommend_movies(movie_name):
@@ -92,10 +64,10 @@ def recommend():
         return jsonify({"error": str(e)}), 500
 
 
+
 @app.route('/')
 def home():
     return "Movie Recommender Flask API is running!"
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
